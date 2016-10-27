@@ -19,7 +19,8 @@ use DOMDocument;
  *
  * @author jacob
  */
-class RestServer {
+class RestServer
+{
 	public $url;
 	public $method;
 	public $params;
@@ -344,7 +345,7 @@ class RestServer {
 
 	public function getFormat()
 	{
-		$format = \ExtCel\RestServer\RestFormat::PLAIN;
+		$format = RestFormat::PLAIN;
 		$accept_mod = null;
 		if(isset($_SERVER["HTTP_ACCEPT"])) {
 			$accept_mod = preg_replace('/\s+/i', '', $_SERVER['HTTP_ACCEPT']); // ensures that exploding the HTTP_ACCEPT string does not get confused by whitespaces
@@ -366,10 +367,10 @@ class RestServer {
 
 		// Give GET parameters precedence before all other options to alter the format
 		$override = isset($_GET['format']) ? $_GET['format'] : $override;
-		if (isset(\ExtCel\RestServer\RestFormat::$formats[$override])) {
-			$format = \ExtCel\RestServer\RestFormat::$formats[$override];
-		} elseif (in_array(\ExtCel\RestServer\RestFormat::JSON, $accept)) {
-			$format = \ExtCel\RestServer\RestFormat::JSON;
+		if (isset(RestFormat::$formats[$override])) {
+			$format = RestFormat::$formats[$override];
+		} elseif (in_array(RestFormat::JSON, $accept)) {
+			$format = RestFormat::JSON;
 		}
 		return $format;
 	}
@@ -389,7 +390,7 @@ class RestServer {
 		header("Expires: 0");
 		header('Content-Type: ' . $this->format);
 
-		if ($this->format == \ExtCel\RestServer\RestFormat::XML) {
+		if ($this->format == RestFormat::XML) {
 
 		if (is_object($data) && method_exists($data, '__keepOut')) {
 				$data = clone $data;

@@ -13,7 +13,8 @@
          */
         public function test()
         {
-            return "Hello World";
+            $file = __DIR__ . 'index.phtml';
+            $this->render =
         }
         /**
          * Logs in a user with the given username and password POSTed. Though true
