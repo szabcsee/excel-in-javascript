@@ -1,8 +1,9 @@
 <?php
+namespace ExtCel\RestServer;
+
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-namespace ExtCel\RestServer;
 
 class RestFormat {
 	const PLAIN = 'text/plain';
