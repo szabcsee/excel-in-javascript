@@ -14,7 +14,7 @@
         public function test()
         {
             $file = __DIR__ . 'index.phtml';
-            $this->render =
+            $this->render = $file;
         }
         /**
          * Logs in a user with the given username and password POSTed. Though true
