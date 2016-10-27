@@ -3,7 +3,9 @@
 
     require __DIR__ . '/rest-server/RestServer.php';
     require __DIR__ . '/controller/MainController.php';
-    $server = new RestServer('debug');
+
+    $server = new \ExtCel\RestServer\RestServer('debug');
     $server->addClass('MainController');
     $server->handle();
+
 ?>

@@ -2,8 +2,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-class RestFormat
-{
+class RestFormat {
 	const PLAIN = 'text/plain';
 	const HTML  = 'text/html';
 	const JSON  = 'application/json';

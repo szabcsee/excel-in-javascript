@@ -1,6 +1,6 @@
 <?php
 
-namespace RestServer;
+namespace ExtCel\RestServer;
 
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
@@ -19,8 +19,7 @@ use DOMDocument;
  *
  * @author jacob
  */
-class RestServer
-{
+class RestServer {
 	public $url;
 	public $method;
 	public $params;
