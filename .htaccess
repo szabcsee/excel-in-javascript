@@ -1,5 +1,6 @@
 DirectoryIndex phpinfo.php
 
+php_flag display_errors 1
 <IfModule mod_rewrite.c>
 	# Turn Rewrite Engine on
 	RewriteEngine On
