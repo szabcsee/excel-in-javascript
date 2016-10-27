@@ -2,7 +2,7 @@
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
 
-    use \RestServer\RestException;
+    use RestException;
 
     class MainController
     {
@@ -40,7 +40,8 @@
             // } else {
             //     $user = $_SESSION['user'];
             // }
-            return array("id" => $id, "name" => null); // serializes object into JSON
+            //return array("id" => $id, "name" => null); // serializes object into JSON
+            return "Hello User";
         }
         /**
          * Saves a user to the database

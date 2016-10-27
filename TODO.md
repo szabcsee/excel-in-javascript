@@ -1,4 +1,4 @@
-## Good to know
+# Good to know
 
 * Javascript client:
     https://github.com/tastejs/todomvc/tree/gh-pages/examples/vanillajs
