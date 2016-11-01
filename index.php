@@ -6,6 +6,9 @@
 	
     $server = new ServerRouting();
 	$path = $server->getPath();
-	print_r($path);
+	if ($path) {
+		$mainpage = file_get_contents(__DIR__ . '/js/src/index.html');
+		echo $mainpage;
+	}
 
 ?>
