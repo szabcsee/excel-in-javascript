@@ -1,147 +1,120 @@
-var ExtCelView = function (model) {
+var ExtCelView = function(model) {
     this.model = model;
+    this.addCellValueEvent = new Event(this);
+    this.updateCellValueEvent = new Event(this);
+    this.deleteCellValueEvent = new Event(this);
+    this.addRowEvent = new Event(this);
+    this.removeRowEvent = new Event(this);
+    this.addColumnEvent = new Event(this);
+    this.removeColumnEvent = new Event(this);
 
     this.init();
 };
 
 ExtCelView.prototype = {
 
-    init: function () {
-        this.createSheet()
-        this.setupHandlers()
-        this.enable();
+    init: function() {
+        this.createContextMenu();
+        this.createSheet();
+        this.setupHandlers();
+        this.fillSheet();
     },
 
-    createSheet: function () {
+    createSheet: function() {
         // cache the document object
-        this.$container = $('#js_wrapper');
-        this.$addRowButton = this.$container.find('.add_row_button');
-        this.$addColumnButton = this.$container.find('.add_column_button');
-        this.$deleteRowButton = this.$container.find('.delete_row_button');
-		this.$deleteColumnButton = this.$container.find('.delete_column_button');
+        this.$container = $('.js_wrapper');
+        this.$addRowButton = $(".custom-menu").find('*[data-action="add_row"]');
+        this.$addColumnButton = $(".custom-menu").find('*[data-action="add_column"]');
+        this.$deleteRowButton = $(".custom-menu").find('*[data-action="delete_row"]');
+        this.$deleteColumnButton = $(".custom-menu").find('*[data-action="delete_column"]');
 
         return this;
     },
 
-    setupHandlers: function () {
+    createContextMenu: function() {
 
-        this.addRowButtonHandler = this.addRowButton.bind(this);
-		this.addColumnButtonHandler = this.addColumnButton.bind(this);
-		this.deleteRowButtonHandler = this.deleteRowButton.bind(this);
-		this.deleteColumnButtonHandler = this.deleteColumnButton.bind(this);
-       
+        $('.js_wrapper').bind("contextmenu", function(event) {
 
-        /**
-        Handlers from Event Dispatcher
-        */
-        this.addCellValueEventHandler = this.addCellValueEvent.bind(this);
-   	 	this.addRowEventHandler = this.addRowEvent.bind(this);
-   	 	this.addColumnEventHandler = this.addColumnEvent.bind(this);
-   	 	this.deleteRowEventHandler = this.deleteRowEvent.bind(this);
-   	 	this.deleteColumnEventHandler = this.deleteColumnEvent.bind(this);
-   	 	this.deleteCellValueEventHandler = this.deleteCellValueEvent.bind(this);
-   	 	this.updateCellValueEventHandler = this.updateCellValueEvent.bind(this);
-        
-        return this;
-    },
+            // Avoid the real one
+            event.preventDefault();
 
-    enable: function () {
+            // Show contextmenu
+            $(".custom-menu").finish().toggle(100).css({
+                top: event.pageY + "px",
+                left: event.pageX + "px"
+            });
+        });
 
-        this.$addTaskButton.click(this.addTaskButtonHandler);
-        this.$container.on('click', '.js-task', this.selectOrUnselectTaskHandler);
-        this.$container.on('click', '.js-complete-task-button', this.completeTaskButtonHandler);
-        this.$container.on('click', '.js-delete-task-button', this.deleteTaskButtonHandler);
 
-        /**
-         * Event Dispatcher
-         */
-        this.model.addTaskEvent.attach(this.addTaskHandler);
-        this.model.addTaskEvent.attach(this.clearTaskTextBoxHandler);
-        this.model.setTasksAsCompletedEvent.attach(this.setTasksAsCompletedHandler);
-        this.model.deleteTasksEvent.attach(this.deleteTasksHandler);
+        // If the document is clicked somewhere
+        $(document).bind("mousedown", function(e) {
+            console.log('clicked');
 
-        return this;
-    },
+            // If the clicked element is not the menu
+            if ($(e.target).parents(".custom-menu").length === 0) {
 
-    addTaskButton: function () {
-        this.addTaskEvent.notify({
-            task: this.$taskTextBox.val()
+                // Hide it
+                $(".custom-menu").hide(100);
+            }
+        });
+
+
+        // If the menu element is clicked
+        $(".custom-menu li").click(function() {
+
+            // This is the triggered action name
+            switch ($(this).attr("data-action")) {
+
+                // A case for each action. Your actions here
+                // This entirely handled by the EventDispatcher and Controller
+                case "add_row":
+                    console.log('Context menu item clicked.');
+                    break;
+                case "add_column":
+                    console.log('Context menu item clicked.');
+                    break;
+                case "delete_row":
+                    console.log('Context menu item clicked.');
+                    break;
+                case "delete_column":
+                    console.log('Context menu item clicked.');
+                    break;
+            }
+
+            // Hide it AFTER the action was triggered
+            $(".custom-menu").hide(100);
         });
     },
 
-    completeTaskButton: function () {
-        this.completeTaskEvent.notify();
+    setupHandlers: function() {
+
+        this.$addRowButton.on("click", this.addRowButton);
+        this.$addColumnButton.on("click", this.addColumnButton);
+        this.$deleteRowButton.on("click", this.deleteRowButton);
+        this.$deleteColumnButton.on("click", this.deleteColumnButton);
+        return this;
     },
 
-    deleteTaskButton: function () {
-        this.deleteTaskEvent.notify();
-    },
-
-    selectOrUnselectTask: function () {
-
-        var taskIndex = $(event.target).attr("data-index");
-
-        if ($(event.target).attr('data-task-selected') == 'false') {
-            $(event.target).attr('data-task-selected', true);
-            this.selectTaskEvent.notify({
-                taskIndex: taskIndex
-            });
-        } else {
-            $(event.target).attr('data-task-selected', false);
-            this.unselectTaskEvent.notify({
-                taskIndex: taskIndex
-            });
-        }
-
-    },
-
-    show: function () {
-        this.buildList();
-    },
-
-    buildList: function () {
-        var tasks = this.model.getTasks();
-        var html = "";
-        var $tasksContainer = this.$tasksContainer;
-
-        $tasksContainer.html('');
-
-        var index = 0;
-        for (var task in tasks) {
-
-            if (tasks[task].taskStatus == 'completed') {
-                html += "<div style="color:green;">";
-            } else {
-                html += "<div>";
-            }
-
-            $tasksContainer.append(html + "<label><input type="checkbox" class="js-task" data-index="" + index + "" data-task-selected="false">" + tasks[task].taskName + "</label></div>");
-
-            index++;
-        }
+    fillSheet: function() {
 
     },
 
 
-
-    /* -------------------- Handlers From Event Dispatcher ----------------- */
-
-    clearTaskTextBox: function () {
-        this.$taskTextBox.val('');
-    },
-
-    addTask: function () {
-        this.show();
-    },
-
-    setTasksAsCompleted: function () {
-        this.show();
+    /**------ Handlers ------**/
+    addRowButton: function() {
 
     },
 
-    deleteTasks: function () {
-        this.show();
+    addColumnButton: function() {
+
+    },
+
+    deleteRowButton: function() {
+
+    },
+
+    deleteColumnButton: function() {
 
     }
 
-    /* -------------------- End Handlers From Event Dispatcher ----------------- */
+};
