@@ -14,11 +14,11 @@ var ExtCelView = function(model) {
 ExtCelView.prototype = {
 
     init: function() {
-        this.createContextMenu();
         this.createSheet();
         this.setupHandlers();
         this.enable();
         this.fillSheet();
+		this.createContextMenu();
     },
 
     createSheet: function() {
@@ -34,8 +34,8 @@ ExtCelView.prototype = {
 
     createContextMenu: function() {
 
-        $('.js_wrapper').bind("contextmenu", function(event) {
-
+        $('.cell').bind("contextmenu", function(event) {
+			
             // Avoid the real one
             event.preventDefault();
 
@@ -49,7 +49,6 @@ ExtCelView.prototype = {
 
         // If the document is clicked somewhere
         $(document).bind("mousedown", function(e) {
-            console.log('clicked');
 
             // If the clicked element is not the menu
             if ($(e.target).parents(".custom-menu").length === 0) {
@@ -104,12 +103,11 @@ ExtCelView.prototype = {
     fillSheet: function() {
         var container = $('.js_wrapper'),
             htmlRow,
-            htmlCell,
+            htmlCol,
             columns,
             rows,
             cells,
-            currentRow,
-            currrentCells;
+			currentRow;
 
         this.model.loadAll();
 
@@ -117,23 +115,42 @@ ExtCelView.prototype = {
         rows = this.model.rows;
         cells = this.model.cells;
         rows.sort(this.dynamicSort("rowIndex"));
+		
+		//Setup the rows of the Extcel sheet
         for (var i = 0; i <= rows.length - 1; i++) {
             currentRow = rows[i];
             htmlRow = $("<div class='row' rowId='" + currentRow.rowId + "'></div>");
-            currentCells = this.filterCurrentCells(cells, currentRow.rowId);
-            currentCells.sort(this.dynamicSort("colIndex"));
-            for (var j = 0; j <= currentCells.length - 1; j++) {
-                htmlCell = $('<input type="text" class="cell" data-colid="' + currentCells[j].cellId +'" data-rowid="' + currentCells[j].rowId + '" value="' + currentCells[j].cellValue + '">');
-                $(htmlRow).append(htmlCell);
+            columns.sort(this.dynamicSort("colIndex"));
+			//Setup the columns of the Extcel sheet
+            for (var j = 0; j <= columns.length - 1; j++) {
+                	htmlCell = $('<input type="text" class="cell" data-colid="' + columns[j].colId +'" data-rowid="' + currentRow.rowId + '" value="">');
+					$(htmlCell).css('width',$('.js_wrapper').width()/columns.length);
+					if (currentRow.rowId === 'null' && columns[j].colId === "null") {
+						$(htmlCell).prop('value','');
+						$(htmlCell).prop('disabled', true);
+						$(htmlCell).addClass('disabled_cell');
+					}
+					else if ( columns[j].colId === "null"){
+						$(htmlCell).prop('value',currentRow.rowId);
+						$(htmlCell).prop('disabled', true);
+						$(htmlCell).addClass('disabled_cell');
+					}
+                	else if (currentRow.rowId === 'null') {
+                		$(htmlCell).prop('value', columns[j].colId);
+						$(htmlCell).prop('disabled', true);
+						$(htmlCell).addClass('disabled_cell');
+						
+                	}
+				$(htmlRow).append(htmlCell);
             }
             $(container).append(htmlRow);
         }
-    },
-
-    filterCurrentCells: function(arr, criteria) {
-        return arr.filter(function(obj) {
-            return obj.rowId === criteria;
-        });
+		
+		//Fill the sheet with cell values
+		for (var i = 0; i <= cells.length - 1; i++) {
+			$( "[data-rowid='" + cells[i].rowId + "'][data-colid='" + cells[i].colId + "']" ).val(cells[i].cellValue);
+		}
+		
     },
 
     dynamicSort: function(property) {

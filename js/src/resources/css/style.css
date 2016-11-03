@@ -24,3 +24,14 @@
 .custom-menu li:hover {
     background-color: #DEF;
 }
+input.cell {
+	width: 60px;
+	height: 20px;
+	border: 1px solid #E4E4E4;
+}
+input.cell.disabled_cell {
+	background: #EFEFEF;
+	color: white;
+	font-weight: 400;
+	text-align: center;
+}
