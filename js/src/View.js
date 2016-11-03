@@ -17,7 +17,7 @@ ExtCelView.prototype = {
         this.createContextMenu();
         this.createSheet();
         this.setupHandlers();
-		this.enable();
+        this.enable();
         this.fillSheet();
     },
 
@@ -94,24 +94,71 @@ ExtCelView.prototype = {
         this.$deleteColumnButton.on("click", this.deleteColumnButton);
         return this;
     },
-	
-	enable: function() {
-		this.$addRowButton.click(this.addRowButtonHandler);
-		
-		return this;
-	},
 
-    fillSheet: function() {
-		this.model.loadAll();
+    enable: function() {
+        this.$addRowButton.click(this.addRowButtonHandler);
+
+        return this;
     },
 
+    fillSheet: function() {
+        var container = $('.js_wrapper'),
+            htmlRow,
+            htmlCell,
+            columns,
+            rows,
+            cells,
+            currentRow,
+            currrentCells;
+
+        this.model.loadAll();
+
+        columns = this.model.columns;
+        rows = this.model.rows;
+        cells = this.model.cells;
+        rows.sort(this.dynamicSort("rowIndex"));
+        for (var i = 0; i <= rows.length - 1; i++) {
+            currentRow = rows[i];
+            htmlRow = $("<div class='row' rowId='" + currentRow.rowId + "'></div>");
+            currentCells = this.filterCurrentCells(cells, currentRow.rowId);
+            currentCells.sort(this.dynamicSort("colIndex"));
+            for (var j = 0; j <= currentCells.length - 1; j++) {
+                htmlCell = $('<input type="text" class="cell" data-colid="' + currentCells[j].cellId +'" data-rowid="' + currentCells[j].rowId + '" value="' + currentCells[j].cellValue + '">');
+                $(htmlRow).append(htmlCell);
+                debugger;
+            }
+            $(container).append(htmlRow);
+        }
+    },
+
+    filterCurrentCells: function(arr, criteria) {
+        return arr.filter(function(obj) {
+            return obj.rowId === criteria;
+        });
+    },
+
+    dynamicSort: function(property) {
+        var sortOrder = 1;
+
+        if (property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+
+        return function(a, b) {
+            var a = parseInt(a[property]),
+                b = parseInt(b[property]),
+                result = (a < b) ? -1 : (a > b) ? 1 : 0;
+
+            return result * sortOrder;
+        };
+    },
 
     /**------ Handlers ------**/
     addRowButton: function() {
-		debugger;
-		this.addRowEvent.notify({
-		   task: this.$taskTextBox.val()
-		});
+        this.addRowEvent.notify({
+            task: this.$taskTextBox.val()
+        });
     },
 
     addColumnButton: function() {
@@ -125,11 +172,11 @@ ExtCelView.prototype = {
     deleteColumnButton: function() {
 
     },
-	
-	/*------- Events from Dispatcher -----------*/
-	
-	addRow: function () {
-		alert('Notification from event dispatcher');
-	},
+
+    /*------- Events from Dispatcher -----------*/
+
+    addRow: function() {
+        alert('Notification from event dispatcher');
+    },
 
 };
