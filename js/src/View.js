@@ -17,6 +17,7 @@ ExtCelView.prototype = {
         this.createContextMenu();
         this.createSheet();
         this.setupHandlers();
+		this.enable();
         this.fillSheet();
     },
 
@@ -87,22 +88,30 @@ ExtCelView.prototype = {
     },
 
     setupHandlers: function() {
-
-        this.$addRowButton.on("click", this.addRowButton);
+        this.addRowButtonHandler = this.addRowButton.bind(this);
         this.$addColumnButton.on("click", this.addColumnButton);
         this.$deleteRowButton.on("click", this.deleteRowButton);
         this.$deleteColumnButton.on("click", this.deleteColumnButton);
         return this;
     },
+	
+	enable: function() {
+		this.$addRowButton.click(this.addRowButtonHandler);
+		
+		return this;
+	},
 
     fillSheet: function() {
-
+		this.model.loadAll();
     },
 
 
     /**------ Handlers ------**/
     addRowButton: function() {
-
+		debugger;
+		this.addRowEvent.notify({
+		   task: this.$taskTextBox.val()
+		});
     },
 
     addColumnButton: function() {
@@ -115,6 +124,12 @@ ExtCelView.prototype = {
 
     deleteColumnButton: function() {
 
-    }
+    },
+	
+	/*------- Events from Dispatcher -----------*/
+	
+	addRow: function () {
+		alert('Notification from event dispatcher');
+	},
 
 };

@@ -18,6 +18,17 @@ ExtCelController.prototype = {
         this.deleteRowButtonHandler = this.deleteRowButton.bind(this);
         this.deleteColumnButtonHandler = this.deleteColumnButton.bind(this);
 
-            return this;
-    }
+        return this;
+    },
+	
+	enable: function() {
+		this.view.addRowEvent.attach(this.addRowHandler);
+		
+		return this;
+	},
+	
+	addTask: function (sender, args) {
+	        //this.model.addTask(args.task);
+			alert('action called from the controller.');
+	},
 };
