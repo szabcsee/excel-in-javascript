@@ -125,7 +125,6 @@ ExtCelView.prototype = {
             for (var j = 0; j <= currentCells.length - 1; j++) {
                 htmlCell = $('<input type="text" class="cell" data-colid="' + currentCells[j].cellId +'" data-rowid="' + currentCells[j].rowId + '" value="' + currentCells[j].cellValue + '">');
                 $(htmlRow).append(htmlCell);
-                debugger;
             }
             $(container).append(htmlRow);
         }
