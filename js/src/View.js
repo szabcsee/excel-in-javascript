@@ -7,6 +7,7 @@ var ExtCelView = function(model) {
     this.removeRowEvent = new Event(this);
     this.addColumnEvent = new Event(this);
     this.removeColumnEvent = new Event(this);
+	this.activeCellChangeEvent = new Event(this);
 
     this.init();
 };
@@ -15,15 +16,16 @@ ExtCelView.prototype = {
 
     init: function() {
         this.createSheet();
+		this.fillSheet();
         this.setupHandlers();
         this.enable();
-        this.fillSheet();
 		this.createContextMenu();
     },
 
     createSheet: function() {
         // cache the document object
         this.$container = $('.js_wrapper');
+		this.$cell = $(".cell");
         this.$addRowButton = $(".custom-menu").find('*[data-action="add_row"]');
         this.$addColumnButton = $(".custom-menu").find('*[data-action="add_column"]');
         this.$deleteRowButton = $(".custom-menu").find('*[data-action="delete_row"]');
@@ -91,6 +93,7 @@ ExtCelView.prototype = {
         this.$addColumnButton.on("click", this.addColumnButton);
         this.$deleteRowButton.on("click", this.deleteRowButton);
         this.$deleteColumnButton.on("click", this.deleteColumnButton);
+		this.$cell.on('focus', this.activeCellHandler);
         return this;
     },
 
@@ -169,6 +172,12 @@ ExtCelView.prototype = {
             return result * sortOrder;
         };
     },
+	
+	activeCellHandler: function(cell) {
+		this.activeCellChangeEvent.notify({
+			cell: cell
+		});
+	},
 
     /**------ Handlers ------**/
     addRowButton: function() {

@@ -2,6 +2,7 @@ var ExtCelModel = function () {
      this.cells = [];
 	 this.rows = [];
 	 this.columns = [];
+	 this.activeCell = {};
 	 this.addCellValueEvent = new Event(this);
 	 this.addRowEvent = new Event(this);
 	 this.removeRowEvent = new Event(this);
@@ -52,6 +53,10 @@ var ExtCelModel = function () {
 	 updateCellValue: function(cell) {
 
         this.updateCellValueEvent.notify();
+	 },
+	 
+	 updateCurrentCell: function(cell) {
+		 this.activeCell = cell;
 	 },
 
      getCells: function () {

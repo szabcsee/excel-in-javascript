@@ -17,18 +17,24 @@ ExtCelController.prototype = {
         this.addColumnButtonHandler = this.addColumnButton.bind(this);
         this.deleteRowButtonHandler = this.deleteRowButton.bind(this);
         this.deleteColumnButtonHandler = this.deleteColumnButton.bind(this);
-
+		this.activeCellChangeHandler = this.activeCellChangeUpdate(this);
         return this;
     },
 	
 	enable: function() {
 		this.view.addRowEvent.attach(this.addRowHandler);
+		this.view.activeCellChangeEvent.attach(this.activeCellChangeHandler);
 		
 		return this;
 	},
 	
-	addTask: function (sender, args) {
+	addRowButton: function (sender, args) {
 	        //this.model.addTask(args.task);
 			alert('action called from the controller.');
 	},
+	
+	activeCellChangeUpdate: function(sender, args) {
+		debugger;
+		this.model.activeCellChange(args);
+	}
 };
