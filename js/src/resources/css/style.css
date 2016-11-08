@@ -35,3 +35,15 @@ input.cell.disabled_cell {
 	font-weight: 400;
 	text-align: center;
 }
+.editing_field {
+    margin-top: 10px;
+    color: white;
+    font-size: 12px;
+}
+#currently_edited {
+    margin: 0px 2px;
+    padding: 2px 4px;
+    background: white;
+    color: #242424;
+    font-weight: bold;
+}

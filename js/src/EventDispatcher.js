@@ -6,7 +6,11 @@ var Event = function (sender) {
 Event.prototype = {
 
     attach: function (listener) {
-        this._listeners.push(listener);
+        if (listener) {
+            this._listeners.push(listener);
+        } else {
+            console.log('There is a problem with event handling. One or more listener not defined properly.');
+        }
     },
 
     notify: function (args) {

@@ -7,7 +7,7 @@ var ExtCelView = function(model) {
     this.removeRowEvent = new Event(this);
     this.addColumnEvent = new Event(this);
     this.removeColumnEvent = new Event(this);
-	this.activeCellChangeEvent = new Event(this);
+    this.activeCellChangeEvent = new Event(this);
 
     this.init();
 };
@@ -16,16 +16,16 @@ ExtCelView.prototype = {
 
     init: function() {
         this.createSheet();
-		this.fillSheet();
+        this.fillSheet();
         this.setupHandlers();
         this.enable();
-		this.createContextMenu();
+        this.createContextMenu();
+        this.setupNavigation();
     },
 
     createSheet: function() {
         // cache the document object
         this.$container = $('.js_wrapper');
-		this.$cell = $(".cell");
         this.$addRowButton = $(".custom-menu").find('*[data-action="add_row"]');
         this.$addColumnButton = $(".custom-menu").find('*[data-action="add_column"]');
         this.$deleteRowButton = $(".custom-menu").find('*[data-action="delete_row"]');
@@ -33,11 +33,39 @@ ExtCelView.prototype = {
 
         return this;
     },
+    setupNavigation: function() {
+        $(document).on("keydown", function(e){
+            var field = e.target,
+                row,
+                index;
+
+            if(e.keyCode === 38) {
+                // up
+                index = $(field).index();
+                row = $(field).parent().prev();
+                $(row).children().eq(index).focus();
+            }
+            else if(e.keyCode === 40) {
+                // down
+                index = $(field).index();
+                row = $(field).parent().next();
+                $(row).children().eq(index).focus();
+            }
+            else if(e.keyCode === 37) {
+            // left
+                $(field).prev('.cell').focus();
+            }
+            else if(e.keyCode === 39) {
+            // right
+                $(field).next('.cell').focus();
+            }
+        });
+    },
 
     createContextMenu: function() {
 
         $('.cell').bind("contextmenu", function(event) {
-			
+
             // Avoid the real one
             event.preventDefault();
 
@@ -90,15 +118,20 @@ ExtCelView.prototype = {
 
     setupHandlers: function() {
         this.addRowButtonHandler = this.addRowButton.bind(this);
+        this.cellClickHandler = this.activeCellHandler.bind(this);
+        this.blurCellHandler = this.updateCellValueHandler.bind(this);
         this.$addColumnButton.on("click", this.addColumnButton);
         this.$deleteRowButton.on("click", this.deleteRowButton);
         this.$deleteColumnButton.on("click", this.deleteColumnButton);
-		this.$cell.on('focus', this.activeCellHandler);
+
         return this;
     },
 
     enable: function() {
+        this.$allCells = $('.cell');
         this.$addRowButton.click(this.addRowButtonHandler);
+        this.$allCells.focus(this.cellClickHandler);
+        this.$allCells.blur(this.blurCellHandler);
 
         return this;
     },
@@ -110,7 +143,7 @@ ExtCelView.prototype = {
             columns,
             rows,
             cells,
-			currentRow;
+            currentRow;
 
         this.model.loadAll();
 
@@ -118,42 +151,42 @@ ExtCelView.prototype = {
         rows = this.model.rows;
         cells = this.model.cells;
         rows.sort(this.dynamicSort("rowIndex"));
-		
-		//Setup the rows of the Extcel sheet
+
+        //Setup the rows of the Extcel sheet
         for (var i = 0; i <= rows.length - 1; i++) {
             currentRow = rows[i];
             htmlRow = $("<div class='row' rowId='" + currentRow.rowId + "'></div>");
             columns.sort(this.dynamicSort("colIndex"));
-			//Setup the columns of the Extcel sheet
+            //Setup the columns of the Extcel sheet
             for (var j = 0; j <= columns.length - 1; j++) {
-                	htmlCell = $('<input type="text" class="cell" data-colid="' + columns[j].colId +'" data-rowid="' + currentRow.rowId + '" value="">');
-					$(htmlCell).css('width',$('.js_wrapper').width()/columns.length);
-					if (currentRow.rowId === 'null' && columns[j].colId === "null") {
-						$(htmlCell).prop('value','');
-						$(htmlCell).prop('disabled', true);
-						$(htmlCell).addClass('disabled_cell');
-					}
-					else if ( columns[j].colId === "null"){
-						$(htmlCell).prop('value',currentRow.rowId);
-						$(htmlCell).prop('disabled', true);
-						$(htmlCell).addClass('disabled_cell');
-					}
-                	else if (currentRow.rowId === 'null') {
-                		$(htmlCell).prop('value', columns[j].colId);
-						$(htmlCell).prop('disabled', true);
-						$(htmlCell).addClass('disabled_cell');
-						
-                	}
-				$(htmlRow).append(htmlCell);
+                htmlCell = $('<input type="text" class="cell" data-colid="' + columns[j].colId + '" data-rowid="' + currentRow.rowId + '" value="">');
+                $(htmlCell).css('width', $('.js_wrapper').width() / columns.length);
+                if (currentRow.rowId === 'null' && columns[j].colId === "null") {
+                    $(htmlCell).prop('value', '');
+                    $(htmlCell).prop('disabled', true);
+                    $(htmlCell).addClass('disabled_cell');
+                } else if (columns[j].colId === "null") {
+                    $(htmlCell).prop('value', currentRow.rowId);
+                    $(htmlCell).prop('disabled', true);
+                    $(htmlCell).addClass('disabled_cell');
+                } else if (currentRow.rowId === 'null') {
+                    $(htmlCell).prop('value', columns[j].colId);
+                    $(htmlCell).prop('disabled', true);
+                    $(htmlCell).addClass('disabled_cell');
+
+                }
+                $(htmlRow).append(htmlCell);
             }
             $(container).append(htmlRow);
         }
-		
-		//Fill the sheet with cell values
-		for (var i = 0; i <= cells.length - 1; i++) {
-			$( "[data-rowid='" + cells[i].rowId + "'][data-colid='" + cells[i].colId + "']" ).val(cells[i].cellValue);
-		}
-		
+
+        //Fill the sheet with cell values
+        for (var i = 0; i <= cells.length - 1; i++) {
+            $("[data-rowid='" + cells[i].rowId + "'][data-colid='" + cells[i].colId + "']").val(cells[i].cellValue);
+        }
+
+        return this;
+
     },
 
     dynamicSort: function(property) {
@@ -165,19 +198,38 @@ ExtCelView.prototype = {
         }
 
         return function(a, b) {
-            var a = parseInt(a[property]),
-                b = parseInt(b[property]),
-                result = (a < b) ? -1 : (a > b) ? 1 : 0;
+            var aInt = parseInt(a[property]),
+                bInt = parseInt(b[property]),
+                result = (aInt < bInt) ? -1 : (aInt > bInt) ? 1 : 0;
 
             return result * sortOrder;
         };
     },
-	
-	activeCellHandler: function(cell) {
-		this.activeCellChangeEvent.notify({
-			cell: cell
-		});
-	},
+
+    activeCellHandler: function() {
+        var event = arguments[0],
+            cell = $(event.target).data();
+
+        this.activeCellChangeEvent.notify({
+            colId: cell.colid,
+            rowId: cell.rowid,
+            cellValue: event.target.value
+        });
+    },
+
+    updateCellValueHandler: function() {
+        var event = arguments[0],
+            cell = $(event.target).data(),
+            updatedCell = {
+                colId: cell.colid,
+                rowId: cell.rowid,
+                cellValue: event.target.value
+            };
+
+        if (JSON.stringify(updatedCell) !== JSON.stringify(this.model.activeCell)) {
+            this.updateCellValueEvent.notify(updatedCell);
+        }
+    },
 
     /**------ Handlers ------**/
     addRowButton: function() {
