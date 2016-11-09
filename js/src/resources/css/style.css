@@ -30,7 +30,7 @@ input.cell {
 	border: 1px solid #E4E4E4;
 }
 input.cell.disabled_cell {
-	background: #EFEFEF;
+	background: #3B5998;
 	color: white;
 	font-weight: 400;
 	text-align: center;

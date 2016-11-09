@@ -1,12 +1,10 @@
 var ExtCelView = function(model) {
     this.model = model;
-    this.addCellValueEvent = new Event(this);
     this.updateCellValueEvent = new Event(this);
-    this.deleteCellValueEvent = new Event(this);
     this.addRowEvent = new Event(this);
-    this.removeRowEvent = new Event(this);
+    this.deleteRowEvent = new Event(this);
     this.addColumnEvent = new Event(this);
-    this.removeColumnEvent = new Event(this);
+    this.deleteColumnEvent = new Event(this);
     this.activeCellChangeEvent = new Event(this);
 
     this.init();
@@ -34,37 +32,36 @@ ExtCelView.prototype = {
         return this;
     },
     setupNavigation: function() {
-        $(document).on("keydown", function(e){
+        $(document).on("keydown", function(e) {
             var field = e.target,
                 row,
                 index;
 
-            if(e.keyCode === 38) {
+            if (e.keyCode === 38) {
                 // up
                 index = $(field).index();
                 row = $(field).parent().prev();
                 $(row).children().eq(index).focus();
-            }
-            else if(e.keyCode === 40) {
+            } else if (e.keyCode === 40) {
                 // down
                 index = $(field).index();
                 row = $(field).parent().next();
                 $(row).children().eq(index).focus();
-            }
-            else if(e.keyCode === 37) {
-            // left
+            } else if (e.keyCode === 37) {
+                // left
                 $(field).prev('.cell').focus();
-            }
-            else if(e.keyCode === 39) {
-            // right
+            } else if (e.keyCode === 39) {
+                // right
                 $(field).next('.cell').focus();
             }
         });
+
+        return this;
     },
 
     createContextMenu: function() {
 
-        $('.cell').bind("contextmenu", function(event) {
+        $('.cell').on("contextmenu", function(event) {
 
             // Avoid the real one
             event.preventDefault();
@@ -78,7 +75,7 @@ ExtCelView.prototype = {
 
 
         // If the document is clicked somewhere
-        $(document).bind("mousedown", function(e) {
+        $(document).on("mousedown", function(e) {
 
             // If the clicked element is not the menu
             if ($(e.target).parents(".custom-menu").length === 0) {
@@ -90,7 +87,7 @@ ExtCelView.prototype = {
 
 
         // If the menu element is clicked
-        $(".custom-menu li").click(function() {
+        $(".custom-menu li").on("click", function() {
 
             // This is the triggered action name
             switch ($(this).attr("data-action")) {
@@ -118,20 +115,25 @@ ExtCelView.prototype = {
 
     setupHandlers: function() {
         this.addRowButtonHandler = this.addRowButton.bind(this);
+        this.addColumnButtonHandler = this.addColumnButton.bind(this);
+        this.deleteRowButtonHandler = this.deleteRowButton.bind(this);
+        this.deleteColumnButtonHandler = this.deleteColumnButton.bind(this);
         this.cellClickHandler = this.activeCellHandler.bind(this);
         this.blurCellHandler = this.updateCellValueHandler.bind(this);
-        this.$addColumnButton.on("click", this.addColumnButton);
-        this.$deleteRowButton.on("click", this.deleteRowButton);
-        this.$deleteColumnButton.on("click", this.deleteColumnButton);
+        this.layoutUpdateHandler = this.refreshView.bind(this);
 
         return this;
     },
 
     enable: function() {
         this.$allCells = $('.cell');
-        this.$addRowButton.click(this.addRowButtonHandler);
-        this.$allCells.focus(this.cellClickHandler);
-        this.$allCells.blur(this.blurCellHandler);
+        this.$addRowButton.on("click", this.addRowButtonHandler);
+        this.$addColumnButton.on("click", this.addColumnButtonHandler);
+        this.$deleteRowButton.on("click", this.deleteRowButtonHandler);
+        this.$deleteColumnButton.on("click", this.deleteColumnButtonHandler);
+        this.$allCells.on("focus", this.cellClickHandler);
+        this.$allCells.on("blur", this.blurCellHandler);
+        this.model.layoutUpdate.attach(this.layoutUpdateHandler);
 
         return this;
     },
@@ -144,9 +146,10 @@ ExtCelView.prototype = {
             rows,
             cells,
             currentRow;
-
-        this.model.loadAll();
-
+        //TODO: Remove when server is ready.
+        if (this.model.rows.length === 0 || this.model.columns.length === 0) {
+            this.model.loadAll();
+        }
         columns = this.model.columns;
         rows = this.model.rows;
         cells = this.model.cells;
@@ -187,6 +190,27 @@ ExtCelView.prototype = {
 
         return this;
 
+    },
+
+    refreshView: function() {
+        $(this.$container).empty();
+        this.fillSheet();
+        this.$allCells = $('.cell');
+        this.$allCells.on("focus", this.cellClickHandler);
+        this.$allCells.on("blur", this.blurCellHandler);
+        $('.cell').on("contextmenu", function(event) {
+
+            // Avoid the real one
+            event.preventDefault();
+
+            // Show contextmenu
+            $(".custom-menu").finish().toggle(100).css({
+                top: event.pageY + "px",
+                left: event.pageX + "px"
+            });
+        });
+
+        return this;
     },
 
     dynamicSort: function(property) {
@@ -233,21 +257,32 @@ ExtCelView.prototype = {
 
     /**------ Handlers ------**/
     addRowButton: function() {
+        var currentRow = this.model.activeCell.rowId;
         this.addRowEvent.notify({
-            task: this.$taskTextBox.val()
+            rowId: currentRow
         });
     },
 
     addColumnButton: function() {
+        var currentColumn = this.model.activeCell.colId;
+        this.addColumnEvent.notify({
+            colId: currentColumn
+        });
 
     },
 
     deleteRowButton: function() {
-
+        var currentRow = this.model.activeCell.rowId;
+        this.deleteRowEvent.notify({
+            rowId: currentRow
+        });
     },
 
     deleteColumnButton: function() {
-
+        var currentColumn = this.model.activeCell.colId;
+        this.deleteColumnEvent.notify({
+            colId: currentColumn
+        });
     },
 
     /*------- Events from Dispatcher -----------*/

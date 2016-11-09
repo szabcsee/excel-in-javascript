@@ -13,10 +13,10 @@ ExtCelController.prototype = {
     },
 
     setupHandlers: function() {
-        this.addRowButtonHandler = this.addRowButton.bind(this);
-        //this.addColumnButtonHandler = this.addColumnButton.bind(this);
-        //this.deleteRowButtonHandler = this.deleteRowButton.bind(this);
-        //this.deleteColumnButtonHandler = this.deleteColumnButton.bind(this);
+        this.addRowHandler = this.addRowButton.bind(this);
+        this.addColumnHandler = this.addColumnButton.bind(this);
+        this.deleteRowHandler = this.deleteRowButton.bind(this);
+        this.deleteColumnHandler = this.deleteColumnButton.bind(this);
 		this.activeCellChangeHandler = this.activeCellChangeUpdate.bind(this);
         this.updateCellValueHandler = this.updateCellValue.bind(this);
         return this;
@@ -24,6 +24,9 @@ ExtCelController.prototype = {
 
 	enable: function() {
 		this.view.addRowEvent.attach(this.addRowHandler);
+        this.view.addColumnEvent.attach(this.addColumnHandler);
+        this.view.deleteRowEvent.attach(this.deleteRowHandler);
+        this.view.deleteColumnEvent.attach(this.deleteColumnHandler);
 		this.view.activeCellChangeEvent.attach(this.activeCellChangeHandler);
         this.view.updateCellValueEvent.attach(this.updateCellValueHandler);
 
@@ -31,9 +34,20 @@ ExtCelController.prototype = {
 	},
 
 	addRowButton: function (sender, args) {
-	        //this.model.addTask(args.task);
-			alert('action called from the controller.');
+        this.model.addRow(args.rowId);
 	},
+
+    addColumnButton: function(sender, args) {
+        this.model.addColumn(args.colId);
+    },
+
+    deleteRowButton: function (sender, args) {
+        this.model.deleteRow(args.rowId);
+    },
+
+    deleteColumnButton: function(sender, args) {
+        this.model.deleteColumn(args.colId);
+    },
 
 	activeCellChangeUpdate: function(sender, args) {
         var cell =  args;
