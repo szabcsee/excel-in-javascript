@@ -52,11 +52,6 @@ ExtCelController.prototype = {
 	activeCellChangeUpdate: function(sender, args) {
         var cell =  args;
         this.model.updateCurrentCell(cell);
-        console.log('Active Cell updated');
-
-        $('#currently_edited').html(' column: ' + cell.colId + ' row: ' + cell.rowId + ' value: ' + cell.cellValue);
-
-        return this;
 	},
 
     updateCellValue: function(sender, args) {

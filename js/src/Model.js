@@ -15,6 +15,10 @@ var ExtCelModel = function() {
  * @type {Object}
  */
 ExtCelModel.prototype = {
+
+    getId: function() {
+        return Math.floor(Math.random() * 26) + Date.now();
+    },
     /**
      * Loads all data to the model (cell values,rows,columns) from JSON input.
      * @return {[type]} [description]
@@ -100,14 +104,15 @@ ExtCelModel.prototype = {
             })[0],
             currentIndex = currentRow.rowIndex;
 
-        $(this.rows).each(function(e) {
-            if (e.rowIndex >= currentIndex) {
-                e.rowIndex += 1;
+        for (var k = 0; k <= this.rows.length - 1; k++) {
+            var rowIndex = parseInt(this.rows[k].rowIndex);
+            if (rowIndex >= currentIndex) {
+                this.rows[k].rowIndex = rowIndex + 1;
             }
-        });
+        }
+
         this.rows.push({
-            //TODO: ID gene3ration
-            rowId: this.rows.length,
+            rowId: this.getId(),
             rowIndex: currentIndex
         });
         this.layoutUpdate.notify();
@@ -122,16 +127,20 @@ ExtCelModel.prototype = {
                 return (e.colId == colId);
             })[0],
             currentIndex = currentColumn.colIndex;
-        $(this.columns).each(function(e) {
-            if (e.colIndex >= currentIndex) {
-                e.colIndex += 1;
+
+        for (var k = 0; k <= this.columns.length - 1; k++) {
+            var colIndex = parseInt(this.columns[k].colIndex);
+            if (colIndex >= currentIndex) {
+                this.columns[k].colIndex = colIndex + 1;
             }
-        });
+        }
+
         this.columns.push({
             //TODO: ID gene3ration
-            colId: this.columns.length,
+            colId: this.getId(),
             colIndex: currentIndex
         });
+
         this.layoutUpdate.notify();
     },
 
@@ -143,11 +152,17 @@ ExtCelModel.prototype = {
 
         this.rows.splice(currentIndex, 1);
 
-        $(this.rows).each(function(e) {
-            if (e.rowIndex > currentIndex) {
-                e.rowIndex -= 1;
+        for (var k = 0; k <= this.rows.length - 1; k++) {
+            if (this.rows[k].rowIndex >= currentIndex) {
+                this.rows[k].rowIndex -= 1;
             }
-        });
+        }
+
+        for(var i = 0; i < this.cells.length; i++) {
+                if (this.cells[i].rowId == rowId){
+                    this.cells.splice(i, 1);
+                }
+        }
 
         this.layoutUpdate.notify();
     },
@@ -160,11 +175,17 @@ ExtCelModel.prototype = {
 
         this.columns.splice(currentIndex, 1);
 
-        $(this.columns).each(function(e) {
-            if (e.colIndex > currentIndex) {
-                e.colIndex -= 1;
+        for (var k = 0; k <= this.columns.length - 1; k++) {
+            if (this.columns[k].colIndex >= currentIndex) {
+                this.columns[k].colIndex -= 1;
             }
-        });
+        }
+
+        for(var i = 0; i < this.cells.length; i++) {
+                if (this.cells[i].colId == colId){
+                    this.cells.splice(i, 1);
+                }
+        }
 
         this.layoutUpdate.notify();
     },

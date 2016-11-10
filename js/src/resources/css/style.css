@@ -1,3 +1,22 @@
+body {
+    background-color: #f9f9f9;
+    font-family: 'Roboto', sans-serif;
+}
+.js_wrapper {
+    padding: 0;
+    margin: 0;
+}
+.row {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+.row:hover {
+    background-color: #EEEEEE;
+}
+.cell {
+    background: none;
+}
 /* The whole thing */
 .custom-menu {
     display: none;
@@ -25,24 +44,39 @@
     background-color: #DEF;
 }
 input.cell {
-	width: 60px;
-	height: 20px;
+    font-size: 1em;
+    padding: 0.1em 0em 0.2em;
 	border: 1px solid #E4E4E4;
+    width: 100%;
+}
+input.cell.textCell {
+    text-align: left;
+    color: green;
+    font-weight: bold;
+    font-style: normal;
+}
+input.cell.numberCell {
+    text-align: right;
+    color: blue;
+    font-weight: 400;
+    font-style: italic;
 }
 input.cell.disabled_cell {
-	background: #3B5998;
+	background-color: #3949AB;
+    border: 1px solid #3949AB;
 	color: white;
 	font-weight: 400;
 	text-align: center;
 }
 .editing_field {
-    margin-top: 10px;
+    margin-top: 15px;
     color: white;
-    font-size: 12px;
+    font-size: 13px;
 }
 #currently_edited {
-    margin: 0px 2px;
-    padding: 2px 4px;
+    margin: 0px 8px;
+    border-radius: 35px;
+    padding: 7px;
     background: white;
     color: #242424;
     font-weight: bold;

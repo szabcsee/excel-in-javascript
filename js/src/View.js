@@ -31,6 +31,38 @@ ExtCelView.prototype = {
 
         return this;
     },
+
+    /**
+     * Style cells according to their content (numeric or text)
+     * @return {[type]} [description]
+     */
+    renderCell: function() {
+        var newValue = event.target.value,
+            cell = $(event.target);
+        this.checkStyle(cell, newValue);
+    },
+
+    checkStyle: function(cell, value) {
+        var cell = $(cell);
+
+        // Check if field value is number or not
+        if (value.match(/[a-z]/i)) {
+            if (cell.hasClass('numberCell')) {
+                cell.removeClass('numberCell');
+            }
+            cell.addClass('textCell');
+        } else {
+            if (cell.hasClass('textCell')) {
+                cell.removeClass('textCell');
+            }
+            cell.addClass('numberCell');
+        }
+    },
+
+    /**
+     * Setup keyboard navigation
+     * @return {[type]} [description]
+     */
     setupNavigation: function() {
         $(document).on("keydown", function(e) {
             var field = e.target,
@@ -53,6 +85,11 @@ ExtCelView.prototype = {
             } else if (e.keyCode === 39) {
                 // right
                 $(field).next('.cell').focus();
+            } else if (e.keyCode === 13) {
+                // down and right
+                index = parseInt($(field).index());
+                row = $(field).parent().next();
+                $(row).children().eq(index + 1).focus();
             }
         });
 
@@ -121,11 +158,13 @@ ExtCelView.prototype = {
         this.cellClickHandler = this.activeCellHandler.bind(this);
         this.blurCellHandler = this.updateCellValueHandler.bind(this);
         this.layoutUpdateHandler = this.refreshView.bind(this);
+        this.cellRenderHandler = this.renderCell.bind(this);
 
         return this;
     },
 
     enable: function() {
+
         this.$allCells = $('.cell');
         this.$addRowButton.on("click", this.addRowButtonHandler);
         this.$addColumnButton.on("click", this.addColumnButtonHandler);
@@ -133,8 +172,18 @@ ExtCelView.prototype = {
         this.$deleteColumnButton.on("click", this.deleteColumnButtonHandler);
         this.$allCells.on("focus", this.cellClickHandler);
         this.$allCells.on("blur", this.blurCellHandler);
+        this.$allCells.on("change", this.cellRenderHandler);
         this.model.layoutUpdate.attach(this.layoutUpdateHandler);
 
+        $(window).on('resize', function(){
+            var cells = $('.cell'),
+                rows = $('.row'),
+                ratio = cells.length/rows.length;
+
+            for (var i = cells.length - 1; i >= 0; i--) {
+                $(cells[i]).width( $('.row').first().width() / ratio  - 4  );
+            }
+        });
         return this;
     },
 
@@ -158,22 +207,22 @@ ExtCelView.prototype = {
         //Setup the rows of the Extcel sheet
         for (var i = 0; i <= rows.length - 1; i++) {
             currentRow = rows[i];
-            htmlRow = $("<div class='row' rowId='" + currentRow.rowId + "'></div>");
+            htmlRow = $("<div class='row' rowIndex='" + currentRow.rowIndex + "'rowId='" + currentRow.rowId + "'></div>");
             columns.sort(this.dynamicSort("colIndex"));
             //Setup the columns of the Extcel sheet
             for (var j = 0; j <= columns.length - 1; j++) {
-                htmlCell = $('<input type="text" class="cell" data-colid="' + columns[j].colId + '" data-rowid="' + currentRow.rowId + '" value="">');
+                htmlCell = $('<input type="text" class="cell" data-colid="' + columns[j].colId + '" data-colindex="' + columns[j].colIndex + '" data-rowid="' + currentRow.rowId + '" value="">');
                 $(htmlCell).css('width', $('.js_wrapper').width() / columns.length);
                 if (currentRow.rowId === 'null' && columns[j].colId === "null") {
                     $(htmlCell).prop('value', '');
                     $(htmlCell).prop('disabled', true);
                     $(htmlCell).addClass('disabled_cell');
                 } else if (columns[j].colId === "null") {
-                    $(htmlCell).prop('value', currentRow.rowId);
+                    $(htmlCell).prop('value', currentRow.rowIndex);
                     $(htmlCell).prop('disabled', true);
                     $(htmlCell).addClass('disabled_cell');
                 } else if (currentRow.rowId === 'null') {
-                    $(htmlCell).prop('value', columns[j].colId);
+                    $(htmlCell).prop('value', columns[j].colIndex);
                     $(htmlCell).prop('disabled', true);
                     $(htmlCell).addClass('disabled_cell');
 
@@ -185,7 +234,9 @@ ExtCelView.prototype = {
 
         //Fill the sheet with cell values
         for (var i = 0; i <= cells.length - 1; i++) {
-            $("[data-rowid='" + cells[i].rowId + "'][data-colid='" + cells[i].colId + "']").val(cells[i].cellValue);
+            var currentCell = $("[data-rowid='" + cells[i].rowId + "'][data-colid='" + cells[i].colId + "']");
+            currentCell.val(cells[i].cellValue);
+            this.checkStyle(currentCell,currentCell.val());
         }
 
         return this;
@@ -198,6 +249,7 @@ ExtCelView.prototype = {
         this.$allCells = $('.cell');
         this.$allCells.on("focus", this.cellClickHandler);
         this.$allCells.on("blur", this.blurCellHandler);
+        this.$allCells.on("change", this.cellRenderHandler);
         $('.cell').on("contextmenu", function(event) {
 
             // Avoid the real one
