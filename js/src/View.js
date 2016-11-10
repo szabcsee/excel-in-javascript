@@ -1,3 +1,8 @@
+/**
+ * The View presents the data from the model and listens to the layout Change event to refresh itself when neccessary.
+ * Fires events to the controller when any change happens.
+ * @param {[type]} model [description]
+ */
 var ExtCelView = function(model) {
     this.model = model;
     this.updateCellValueEvent = new Event(this);
@@ -12,6 +17,10 @@ var ExtCelView = function(model) {
 
 ExtCelView.prototype = {
 
+    /**
+     * Initialization of the view
+     * @return {[type]} [description]
+     */
     init: function() {
         this.createSheet();
         this.fillSheet();
@@ -21,6 +30,10 @@ ExtCelView.prototype = {
         this.setupNavigation();
     },
 
+    /**
+     * Already existing functional elements in the DOM.
+     * @return {[type]} [description]
+     */
     createSheet: function() {
         // cache the document object
         this.$container = $('.js_wrapper');
@@ -42,10 +55,16 @@ ExtCelView.prototype = {
         this.checkStyle(cell, newValue);
     },
 
+    /**
+     * Evaluate and assign appropriate styling based on the cell's value
+     * @param  {[type]} cell  [description]
+     * @param  {[type]} value [description]
+     * @return {[type]}       [description]
+     */
     checkStyle: function(cell, value) {
         var cell = $(cell);
 
-        // Check if field value is number or not
+        // Check if field value is numeric only or not
         if (value.match(/[a-z]/i)) {
             if (cell.hasClass('numberCell')) {
                 cell.removeClass('numberCell');
@@ -74,7 +93,7 @@ ExtCelView.prototype = {
                 index = $(field).index();
                 row = $(field).parent().prev();
                 $(row).children().eq(index).focus();
-            } else if (e.keyCode === 40) {
+            } else if (e.keyCode === 40 || e.keyCode === 13) {
                 // down
                 index = $(field).index();
                 row = $(field).parent().next();
@@ -85,17 +104,17 @@ ExtCelView.prototype = {
             } else if (e.keyCode === 39) {
                 // right
                 $(field).next('.cell').focus();
-            } else if (e.keyCode === 13) {
-                // down and right
-                index = parseInt($(field).index());
-                row = $(field).parent().next();
-                $(row).children().eq(index + 1).focus();
+
             }
         });
 
         return this;
     },
 
+    /**
+     * Creates the contextmenu to manipulate rows and columns.
+     * @return {[type]} [description]
+     */
     createContextMenu: function() {
 
         $('.cell').on("contextmenu", function(event) {
@@ -126,30 +145,15 @@ ExtCelView.prototype = {
         // If the menu element is clicked
         $(".custom-menu li").on("click", function() {
 
-            // This is the triggered action name
-            switch ($(this).attr("data-action")) {
-
-                // A case for each action. Your actions here
-                // This entirely handled by the EventDispatcher and Controller
-                case "add_row":
-                    console.log('Context menu item clicked.');
-                    break;
-                case "add_column":
-                    console.log('Context menu item clicked.');
-                    break;
-                case "delete_row":
-                    console.log('Context menu item clicked.');
-                    break;
-                case "delete_column":
-                    console.log('Context menu item clicked.');
-                    break;
-            }
-
             // Hide it AFTER the action was triggered
             $(".custom-menu").hide(100);
         });
     },
 
+    /**
+     * Binds the Views function's to the event handlers with the right scope.
+     * @return {[type]} [description]
+     */
     setupHandlers: function() {
         this.addRowButtonHandler = this.addRowButton.bind(this);
         this.addColumnButtonHandler = this.addColumnButton.bind(this);
@@ -163,6 +167,10 @@ ExtCelView.prototype = {
         return this;
     },
 
+    /**
+     * Assign functions to various events happening on the UI or fired by the model.
+     * @return {[type]} [description]
+     */
     enable: function() {
 
         this.$allCells = $('.cell');
@@ -187,6 +195,10 @@ ExtCelView.prototype = {
         return this;
     },
 
+    /**
+     * Main function to set up the excel sheet inside the js wrapper
+     * @return {[type]} [description]
+     */
     fillSheet: function() {
         var container = $('.js_wrapper'),
             htmlRow,
@@ -196,6 +208,7 @@ ExtCelView.prototype = {
             cells,
             currentRow;
         //TODO: Remove when server is ready.
+        //This makes sure that the hardcoded data is not loaded on refresh but we are working with the current data stored in the model.
         if (this.model.rows.length === 0 || this.model.columns.length === 0) {
             this.model.loadAll();
         }
@@ -232,7 +245,7 @@ ExtCelView.prototype = {
             $(container).append(htmlRow);
         }
 
-        //Fill the sheet with cell values
+        //Fill the sheet with cell values and evaluate them for correct styling
         for (var i = 0; i <= cells.length - 1; i++) {
             var currentCell = $("[data-rowid='" + cells[i].rowId + "'][data-colid='" + cells[i].colId + "']");
             currentCell.val(cells[i].cellValue);
@@ -243,6 +256,10 @@ ExtCelView.prototype = {
 
     },
 
+    /**
+     * Almost the same as the main fill Sheet function. Fills the container div with the model data and reassign the neccessary event handlers.
+     * @return {[type]} [description]
+     */
     refreshView: function() {
         $(this.$container).empty();
         this.fillSheet();
@@ -265,6 +282,11 @@ ExtCelView.prototype = {
         return this;
     },
 
+    /**
+     * Sort function for row and column sorting
+     * @param  {[type]} property [description]
+     * @return {[type]}          [description]
+     */
     dynamicSort: function(property) {
         var sortOrder = 1;
 
@@ -282,6 +304,10 @@ ExtCelView.prototype = {
         };
     },
 
+    /**
+     * This function notifys the Controller about the currently edited cell via an event
+     * @return {[type]} [description]
+     */
     activeCellHandler: function() {
         var event = arguments[0],
             cell = $(event.target).data();
@@ -293,6 +319,11 @@ ExtCelView.prototype = {
         });
     },
 
+    /**
+     * When a cell is blured this function compares the cell's value with the active cell value.
+     * If there are change it notifys the controller about the updated cell.
+     * @return {[type]} [description]
+     */
     updateCellValueHandler: function() {
         var event = arguments[0],
             cell = $(event.target).data(),
@@ -307,7 +338,13 @@ ExtCelView.prototype = {
         }
     },
 
-    /**------ Handlers ------**/
+    /**------ Context menu Handlers ------**/
+
+    /**
+     * Fires the appropriate event
+     * and passes on the active row's or column's id from the model's active cell
+     */
+
     addRowButton: function() {
         var currentRow = this.model.activeCell.rowId;
         this.addRowEvent.notify({
@@ -335,12 +372,6 @@ ExtCelView.prototype = {
         this.deleteColumnEvent.notify({
             colId: currentColumn
         });
-    },
-
-    /*------- Events from Dispatcher -----------*/
-
-    addRow: function() {
-        alert('Notification from event dispatcher');
-    },
+    }
 
 };

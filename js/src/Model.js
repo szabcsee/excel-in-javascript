@@ -143,7 +143,11 @@ ExtCelModel.prototype = {
 
         this.layoutUpdate.notify();
     },
-
+    /**
+     * Deletes an existing row from the Model.
+     * @param  {[type]} rowId [description]
+     * @return {[type]}       [description]
+     */
     deleteRow: function(rowId) {
         var currentRow = $.grep(this.rows, function(e) {
                 return (e.rowId == rowId);
@@ -167,6 +171,11 @@ ExtCelModel.prototype = {
         this.layoutUpdate.notify();
     },
 
+    /**
+     * Deletes an existing column from the Model.
+     * @param  {[type]} colId [description]
+     * @return {[type]}       [description]
+     */
     deleteColumn: function(colId) {
         var currentColumn = $.grep(this.columns, function(e) {
                 return (e.colId == colId);
@@ -189,6 +198,9 @@ ExtCelModel.prototype = {
 
         this.layoutUpdate.notify();
     },
+
+
+
 
     /**
      * This will be required for the serverside implementation to load the Model via separate REST services.
