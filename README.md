@@ -1,4 +1,13 @@
 # Project description
+You will find pretty much everything explained in the comments of the functions. 
+Unfortunately I did not have the time to finish the PHP MYSQL part eventhought the PHP server just needs to be extended and serve the Ajax calls.
+
+The index.php renders the index.html from the js/src/ folder where the Javascript files and UI resources live.
+The UI is an MVC Js app. The View renders the UI and communicates with the controller via firing events. There is an Event Dispatcher that contains the event object and its two functions that makes it possible to subscribe to events and fire (notify) them. The Controller handles the View events and then manipulates the Model accordingly.
+
+For more details please look into the code.
+
+# Project requirements
 Write a small web-based application using php+html+css+javascript+mysql which looks and behaves like a simplified version of the well known MS Excel.
 
   ## Requirements:
